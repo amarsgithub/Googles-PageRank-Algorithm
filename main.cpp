@@ -2,7 +2,9 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <iomanip>
 #include <map>
+#include <math.h>
 using namespace std;
 
 // 7 3
@@ -29,7 +31,7 @@ public:
     void Print();
     void CreateAdjacencyMatrix();
     vector<vector<float>> GetOutDegrees();
-    vector<vector<float>> GetInDegree(vector<vector<float>> outDegrees);
+    vector<vector<float>> GetInDegree();
     void PerformRotations(int numberOfRotations);
 
     bool isEdge(string from, string to);
@@ -130,7 +132,7 @@ vector<int> GetNumberOfOnes(vector<vector<float>> vec)
     return returnValue;
 }
 
-vector<vector<float>> Graph::GetInDegree(vector<vector<float>> outDegrees)
+vector<vector<float>> Graph::GetInDegree()
 {
     vector<vector<float>> inDegrees = InitializeMatrix(outDegrees.size());
 
@@ -153,10 +155,11 @@ vector<vector<float>> Graph::GetInDegree(vector<vector<float>> outDegrees)
 void Graph::CreateAdjacencyMatrix()
 {
     outDegrees = GetOutDegrees();
-    inDegrees = GetInDegree(outDegrees);
+    inDegrees = GetInDegree();
 
-    PrintMatrix(outDegrees);
-    cout << endl;
+    // cout << "Outdegree matrix: " << endl;
+    // PrintMatrix(outDegrees);
+    cout << "Indegree matrix: " << endl;
     PrintMatrix(inDegrees);
 }
 
@@ -176,8 +179,14 @@ void Graph::PerformRotations(int numberOfRotations)
         resultVector.push_back(sum * (1.0f / inDegrees.size()));
     }
 
-    numberOfRotations -= 2;
+    vector<float> tempVector;
+    // cout << "Results vector: " << endl;
+    for (int i = 0; i < resultVector.size(); i++)
+        tempVector.push_back(resultVector[i]);
+    // cout << endl;
+
     // Rest of the rotations stuff:
+    numberOfRotations -= 2;
     if (numberOfRotations > 0)
     {
         for (int k = 0; k < numberOfRotations; k++)
@@ -187,15 +196,23 @@ void Graph::PerformRotations(int numberOfRotations)
                 float sum = 0.0f;
                 for (int j = 0; j < inDegrees.size(); j++)
                 {
-                    sum += inDegrees[i][j];
+                    sum += inDegrees[i][j] * resultVector[j];
                 }
-                resultVector[i] = sum * resultVector[i];
+                tempVector[i] = sum;
+                // resultVector[i] = sum * (1.0f / inDegrees.size());
             }
+            resultVector = tempVector;
         }
     }
 
-    for (int i = 0; i < resultVector.size(); i++)
-        cout <<  resultVector[i] << endl;
+    auto it = vertices.begin();
+    cout << std::fixed << std::setprecision(2);
+    for (int i = 0; it != vertices.end() ; i++, it++)
+        if (isnan(resultVector[i]))
+            cout << *it << " 0.00" << endl;
+        else
+            cout << *it << " " << resultVector[i] << endl;
+
 
 }
 
