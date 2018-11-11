@@ -5,7 +5,7 @@
 #include <map>
 using namespace std;
 
-// 7 2
+// 7 3
 // google.com gmail.com
 // google.com maps.com
 // facebook.com ufl.edu
@@ -30,7 +30,7 @@ public:
     void CreateAdjacencyMatrix();
     vector<vector<float>> GetOutDegrees();
     vector<vector<float>> GetInDegree(vector<vector<float>> outDegrees);
-    void PerformSecondRotation();
+    void PerformRotations(int numberOfRotations);
 
     bool isEdge(string from, string to);
 
@@ -160,10 +160,12 @@ void Graph::CreateAdjacencyMatrix()
     PrintMatrix(inDegrees);
 }
 
-void Graph::PerformSecondRotation()
+void Graph::PerformRotations(int numberOfRotations)
 {
     adjacencyMatrix = InitializeMatrix(outDegrees.size());
     vector<float> resultVector;
+
+    // Second rotation stuff:
     for (int i = 0; i < inDegrees.size(); i++)
     {
         float sum = 0.0f;
@@ -172,6 +174,24 @@ void Graph::PerformSecondRotation()
             sum += inDegrees[i][j];
         }
         resultVector.push_back(sum * (1.0f / inDegrees.size()));
+    }
+
+    numberOfRotations -= 2;
+    // Rest of the rotations stuff:
+    if (numberOfRotations > 0)
+    {
+        for (int k = 0; k < numberOfRotations; k++)
+        {
+            for (int i = 0; i < inDegrees.size(); i++)
+            {
+                float sum = 0.0f;
+                for (int j = 0; j < inDegrees.size(); j++)
+                {
+                    sum += inDegrees[i][j];
+                }
+                resultVector[i] = sum * resultVector[i];
+            }
+        }
     }
 
     for (int i = 0; i < resultVector.size(); i++)
@@ -196,7 +216,7 @@ int main(void)
 
     graph.CreateAdjacencyMatrix();
 
-    graph.PerformSecondRotation();
+    graph.PerformRotations(numPowerIterations);
 
     return 0;
 }
