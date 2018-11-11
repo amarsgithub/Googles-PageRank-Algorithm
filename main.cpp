@@ -7,7 +7,7 @@
 #include <math.h>
 using namespace std;
 
-// 7 3
+// 7 100
 // google.com gmail.com
 // google.com maps.com
 // facebook.com ufl.edu
@@ -15,6 +15,12 @@ using namespace std;
 // ufl.edu gmail.com
 // maps.com facebook.com
 // gmail.com maps.com
+
+// 0 0 0 1 0
+// 0 0 0.5 0 0.5
+// 0 0 0 0 0.5
+// 0 1 0.5 0 0
+// 1 0 0 0 0
 
 class Graph
 {
@@ -146,7 +152,12 @@ vector<vector<float>> Graph::GetInDegree()
     for (int i = 0; i < outDegrees.size(); i++)
     {
         for (int j = 0; j < outDegrees.size(); j++)
+        {
             inDegrees[i][j] = inDegrees[i][j] / numberOfOnes[j];
+            if (isnan(inDegrees[i][j]))
+                inDegrees[i][j] = 0.0f;
+
+        }
     }
 
     return inDegrees;
@@ -159,8 +170,8 @@ void Graph::CreateAdjacencyMatrix()
 
     // cout << "Outdegree matrix: " << endl;
     // PrintMatrix(outDegrees);
-    cout << "Indegree matrix: " << endl;
-    PrintMatrix(inDegrees);
+    // cout << "Indegree matrix: " << endl;
+    // PrintMatrix(inDegrees);
 }
 
 void Graph::PerformRotations(int numberOfRotations)
