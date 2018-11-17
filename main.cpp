@@ -16,12 +16,6 @@ using namespace std;
 // maps.com facebook.com
 // gmail.com maps.com
 
-// 0 0 0 1 0
-// 0 0 0.5 0 0.5
-// 0 0 0 0 0.5
-// 0 1 0.5 0 0
-// 1 0 0 0 0
-
 class Graph
 {
     map<string, vector<string>> adjacencyList;
@@ -38,7 +32,7 @@ public:
     void CreateAdjacencyMatrix();
     vector<vector<float>> GetOutDegrees();
     vector<vector<float>> GetInDegree();
-    void PerformRotations(int numberOfRotations);
+    void PerformRotations(int numberOfRotations, int numPowerIterations);
 
     bool isEdge(string from, string to);
 
@@ -68,6 +62,7 @@ void Graph::Print()
     }
 }
 
+// Initializes a 2D vector
 vector<vector<float>> InitializeMatrix(int n)
 {
     vector<vector<float>> returnMatrix;
@@ -102,6 +97,7 @@ bool Graph::isEdge(string from, string to)
     return false;
 }
 
+// Converts the adjacency list to adjacency matrix
 vector<vector<float>> Graph::GetOutDegrees()
 {
     vector<vector<float>> outDegrees;
@@ -174,8 +170,17 @@ void Graph::CreateAdjacencyMatrix()
     // PrintMatrix(inDegrees);
 }
 
-void Graph::PerformRotations(int numberOfRotations)
+void Graph::PerformRotations(int numberOfRotations, int numPowerIterations)
 {
+    if (numPowerIterations <= 1)
+    {
+        auto it = vertices.begin();
+        cout << std::fixed << std::setprecision(2);
+        for (int i = 0; it != vertices.end() ; i++, it++)
+            cout << *it << " " << 1.0f / inDegrees.size() << endl;
+        return;
+    }
+
     adjacencyMatrix = InitializeMatrix(outDegrees.size());
     vector<float> resultVector;
 
@@ -244,7 +249,7 @@ int main(void)
 
     graph.CreateAdjacencyMatrix();
 
-    graph.PerformRotations(numPowerIterations);
+    graph.PerformRotations(numPowerIterations, numPowerIterations);
 
     return 0;
 }
