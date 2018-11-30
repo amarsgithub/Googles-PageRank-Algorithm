@@ -1,3 +1,10 @@
+// Code written by: Amar Suchak
+// Code completed on: 11/29/2018
+// Summary: Simple implementation of Google's pagerank algorithm. First stores
+// all of the values into an adjacency list and then converts the adjacency
+// list into an adjacency matrix. You can probably tell that I had fun with this
+// assignment while doing it and was experimenting with random ideas.
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -7,35 +14,20 @@
 #include <math.h>
 using namespace std;
 
-// 7 100
-// google.com gmail.com
-// google.com maps.com
-// facebook.com ufl.edu
-// ufl.edu google.com
-// ufl.edu gmail.com
-// maps.com facebook.com
-// gmail.com maps.com
-
 class Graph
 {
     map<string, vector<string>> adjacencyList;
     set<string> vertices;
-
-    vector<vector<float>> adjacencyMatrix;
-
     vector<vector<float>> outDegrees;
     vector<vector<float>> inDegrees;
-
 public:
     void Insert(string from, string to);
     void Print();
     void CreateAdjacencyMatrix();
     vector<vector<float>> GetOutDegrees();
     vector<vector<float>> GetInDegree();
-    void PerformRotations(int numberOfRotations, int numPowerIterations);
-
+    void PerformRotations(int numPowerIterations);
     bool isEdge(string from, string to);
-
 };
 
 // Inserts values into the graph:
@@ -116,6 +108,8 @@ vector<vector<float>> Graph::GetOutDegrees()
     return outDegrees;
 }
 
+// Useless function, probably. Just creates a vector that represents the total
+// outdegree for each website.
 vector<int> GetNumberOfOnes(vector<vector<float>> vec)
 {
     vector<int> returnValue;
@@ -134,6 +128,7 @@ vector<int> GetNumberOfOnes(vector<vector<float>> vec)
     return returnValue;
 }
 
+// Converts an outDegree matrix to an inDegree matrix.
 vector<vector<float>> Graph::GetInDegree()
 {
     vector<vector<float>> inDegrees = InitializeMatrix(outDegrees.size());
@@ -159,77 +154,57 @@ vector<vector<float>> Graph::GetInDegree()
     return inDegrees;
 }
 
+// Function to create the outDegree and inDegrees.
 void Graph::CreateAdjacencyMatrix()
 {
     outDegrees = GetOutDegrees();
     inDegrees = GetInDegree();
-
-    // cout << "Outdegree matrix: " << endl;
-    // PrintMatrix(outDegrees);
-    // cout << "Indegree matrix: " << endl;
-    // PrintMatrix(inDegrees);
 }
 
-void Graph::PerformRotations(int numberOfRotations, int numPowerIterations)
+// Performs the rotations.
+void Graph::PerformRotations(int numPowerIterations)
 {
-    if (numPowerIterations <= 1)
-    {
-        auto it = vertices.begin();
-        cout << std::fixed << std::setprecision(2);
-        for (int i = 0; it != vertices.end() ; i++, it++)
-            cout << *it << " " << 1.0f / inDegrees.size() << endl;
-        return;
-    }
-
-    adjacencyMatrix = InitializeMatrix(outDegrees.size());
-    vector<float> resultVector;
-
-    // Second rotation stuff:
-    for (int i = 0; i < inDegrees.size(); i++)
-    {
-        float sum = 0.0f;
-        for (int j = 0; j < inDegrees.size(); j++)
-        {
-            sum += inDegrees[i][j];
-        }
-        resultVector.push_back(sum * (1.0f / inDegrees.size()));
-    }
-
-    vector<float> tempVector;
-    // cout << "Results vector: " << endl;
-    for (int i = 0; i < resultVector.size(); i++)
-        tempVector.push_back(resultVector[i]);
-    // cout << endl;
-
-    // Rest of the rotations stuff:
-    numberOfRotations -= 2;
-    if (numberOfRotations > 0)
-    {
-        for (int k = 0; k < numberOfRotations; k++)
-        {
-            for (int i = 0; i < inDegrees.size(); i++)
-            {
-                float sum = 0.0f;
-                for (int j = 0; j < inDegrees.size(); j++)
-                {
-                    sum += inDegrees[i][j] * resultVector[j];
-                }
-                tempVector[i] = sum;
-                // resultVector[i] = sum * (1.0f / inDegrees.size());
-            }
-            resultVector = tempVector;
-        }
-    }
+    // graph is inDegrees
+    // websites is vertices
+    vector<float> resultVector, tempVector;
 
     auto it = vertices.begin();
+    for (int i = 0; it != vertices.end(); it++, i++)
+        resultVector.push_back(1.0f/vertices.size());
+
+    if (numPowerIterations <= 1)
+    {
+        cout << std::fixed << std::setprecision(2);
+        for (int i = 0; it != vertices.end(); i++, it++)
+            cout << *it << " " << resultVector[i] << endl;
+    }
+
+    for (int i = 0; i < resultVector.size(); i++)
+        tempVector.push_back(resultVector[i]);
+
+    // Rest of the rotations stuff:
+    numPowerIterations--;
+    for (int k = 0; k < numPowerIterations; k++)
+    {
+        for (int i = 0; i < inDegrees.size(); i++)
+        {
+            float sum = 0.0f;
+            for (int j = 0; j < inDegrees.size(); j++)
+            {
+                sum += inDegrees[i][j] * resultVector[j];
+            }
+            tempVector[i] = sum;
+        }
+        resultVector = tempVector;
+    }
+
+    it = vertices.begin();
     cout << std::fixed << std::setprecision(2);
     for (int i = 0; it != vertices.end() ; i++, it++)
         if (isnan(resultVector[i]))
             cout << *it << " 0.00" << endl;
         else
             cout << *it << " " << resultVector[i] << endl;
-
-
 }
 
 int main(void)
@@ -249,7 +224,7 @@ int main(void)
 
     graph.CreateAdjacencyMatrix();
 
-    graph.PerformRotations(numPowerIterations, numPowerIterations);
+    graph.PerformRotations(numPowerIterations);
 
     return 0;
 }
